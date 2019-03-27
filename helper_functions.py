@@ -5,7 +5,6 @@ import math
 from torch import optim
 from torch import Tensor
 from torch import nn
-from torch.autograd import Variable
 
 mini_batch_size = 100
 
