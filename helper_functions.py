@@ -55,6 +55,7 @@ def xavier_normal_(tensor, gain):
         return tensor.normal_(0,std), std
 
 def train_model(model, train_input, train_target):
+    model.train() 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1e-1)
     nb_epochs = 250
