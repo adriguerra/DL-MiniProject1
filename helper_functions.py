@@ -163,10 +163,12 @@ def normalize(train_input, test_input):
     test_input.sub_(mu).div_(std)
     return train_input, test_input
 
-def preprocess_data(train_input, train_classes, test_input, test_classes):
+def reshape_data(train_input, test_input):
     train_input = train_input.clone().reshape(train_input.size(0), 2, -1)
     test_input = test_input.clone().reshape(test_input.size(0), 2, -1)
+    return train_input, test_input
 
+def split_img_data(train_input, test_input, train_classes, test_classes):
     train_input1 = train_input[:, 0]
     train_input2 = train_input[:, 1]
 
@@ -178,6 +180,12 @@ def preprocess_data(train_input, train_classes, test_input, test_classes):
 
     test_classes1 = test_classes[:,0]
     test_classes2 = test_classes[:,1]
+
+    return train_input1, train_input2, test_input1, test_input2, train_classes1, train_classes2, test_classes1, test_classes2
+
+def preprocess_data(train_input, train_classes, test_input, test_classes):
+    train_input, test_input = reshape_data(train_input, test_input)
+    train_input1, train_input2, test_input1, test_input2, train_classes1, train_classes2, test_classes1, test_classes2 = split_img_data(train_input, test_input, train_classes, test_classes)
 
     train_input1 = 0.9*train_input1
     train_input2 = 0.9*train_input2
@@ -203,7 +211,7 @@ def xavier_normal_(tensor, gain):
     with torch.no_grad():
         return tensor.normal_(0,std), std
 
-def train_model(model, train_input, train_target):
+def train_model(model, train_input, train_target, one_hot_encoded=False):
     model.train()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1e-1)
@@ -213,12 +221,15 @@ def train_model(model, train_input, train_target):
         for b in range(0, train_input.size(0), mini_batch_size):
             output = model(train_input.narrow(0, b, mini_batch_size))
             # max needed if train_target is one-hot encoded
-            loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
+            if(one_hot_encoded):
+                loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
+            else:
+                loss = criterion(output, train_target.narrow(0, b, mini_batch_size))
             model.zero_grad()
             loss.backward()
             optimizer.step()
 
-def compute_nb_errors(model, data_input, data_target):
+def compute_nb_errors(model, data_input, data_target, one_hot_encoded=False):
 
     nb_data_errors = 0
 
@@ -227,12 +238,13 @@ def compute_nb_errors(model, data_input, data_target):
         _, predicted_classes = torch.max(output.data, 1)
         for k in range(mini_batch_size):
             # max needed if one-hot encoded
-            if data_target.data[b + k].max(0)[1] != predicted_classes[k]:
+            target = data_target.data[b + k].max(0)[1] if one_hot_encoded else data_target.data[b + k]
+            if target != predicted_classes[k]:
                 nb_data_errors = nb_data_errors + 1
 
     return nb_data_errors
 
-def compute_errors(m, train_input, train_classes, test_input, test_classes, stds):
+def compute_errors(m, train_input, train_classes, test_input, test_classes, stds, one_hot_encoded):
     """Computes the train errors and test errors of the given models
     for the given standard deviations on the train_input, test_input data
     with the labels in the train_classes and test_classes.
@@ -251,10 +263,11 @@ def compute_errors(m, train_input, train_classes, test_input, test_classes, stds
             for p in model.parameters():
                 p.data.normal_(0, std)
 
-        train_model(model, train_input, train_classes)
+        train_model(model, train_input, train_classes, one_hot_encoded)
+        train_error = compute_nb_errors(model, train_input, train_classes, one_hot_encoded)
+        test_error = compute_nb_errors(model, test_input, test_classes, one_hot_encoded)
         print('std {:f} {:s} train_error {:.02f}% test_error {:.02f}%'.format(
                 std,
                 m.__name__,
-                compute_nb_errors(model, train_input,
-                                  train_classes) / train_input.size(0) * 100,
-                compute_nb_errors(model, test_input, test_classes) / test_input.size(0) * 100))
+                train_error / train_input.size(0) * 100,
+                test_error / test_input.size(0) * 100))
