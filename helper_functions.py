@@ -182,27 +182,6 @@ def split_img_data(train_input, test_input, train_classes, test_classes):
 
     return train_input1, train_input2, test_input1, test_input2, train_classes1, train_classes2, test_classes1, test_classes2
 
-def preprocess_data(train_input, train_classes, test_input, test_classes):
-    train_input, test_input = reshape_data(train_input, test_input)
-    train_input1, train_input2, test_input1, test_input2, train_classes1, train_classes2, test_classes1, test_classes2 = split_img_data(train_input, test_input, train_classes, test_classes)
-
-    train_input1 = 0.9*train_input1
-    train_input2 = 0.9*train_input2
-
-    test_input1 = 0.9*test_input1
-    test_input2 = 0.9*test_input2
-
-    train_classes1 = convert_to_one_hot_labels(train_input1, train_classes1)
-    train_classes2 = convert_to_one_hot_labels(train_input2, train_classes2)
-
-    test_classes1 = convert_to_one_hot_labels(test_input1, test_classes1)
-    test_classes2 = convert_to_one_hot_labels(test_input2, test_classes2)
-
-    train_input1, test_classes1 = normalize(train_input1, test_classes1)
-    train_input2, test_classes2 = normalize(train_input2, test_classes2)
-
-    return train_input1, train_input2, train_classes1, train_classes2, test_input1, test_input2, test_classes1, test_classes2
-
 def xavier_normal_(tensor, gain):
     fan_in = tensor.size()[0]
     fan_out = tensor.size()[1]
