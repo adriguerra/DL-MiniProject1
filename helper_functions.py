@@ -1,4 +1,3 @@
-from dlc_practical_prologue import *
 import torch
 import math
 import argparse
