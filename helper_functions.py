@@ -155,6 +155,7 @@ def generate_pair_sets(nb):
 
 # Our methods
 # TODO merge both
+# TODO document methods
 
 def normalize(train_input, test_input):
     mu, std = train_input.mean(), train_input.std()
