@@ -180,7 +180,7 @@ def split_img_data(train_input, test_input, train_classes, test_classes):
     test_classes1 = test_classes[:,0]
     test_classes2 = test_classes[:,1]
 
-    return train_input1, train_input2, test_input1, test_input2, train_classes1, train_classes2, test_classes1, test_classes2
+    return [train_input1, train_input2], [test_input1, test_input2], [train_classes1, train_classes2], [test_classes1, test_classes2]
 
 def xavier_normal_(tensor, gain):
     fan_in = tensor.size()[0]
