@@ -2,11 +2,13 @@ import torch
 import math
 import argparse
 import os
+import torch.nn.functional as F
 
 from torchvision import datasets
 from torch import optim
 from torch import Tensor
 from torch import nn
+
 
 mini_batch_size = 100
 
