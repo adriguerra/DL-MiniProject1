@@ -196,8 +196,8 @@ def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, 
         y_test[1] = convert_to_one_hot_labels(x_test[1], y_test[1])
 
     if normalized:
-        x_train[0], y_test[0] = normalize(x_train[0], y_test[0])
-        x_train[1], y_test[1] = normalize(x_train[1], y_test[1])
+        x_train[0], x_test[0] = normalize(x_train[0], x_test[0])
+        x_train[1], x_test[1] = normalize(x_train[1], x_test[1])
 
     return x_train, y_train, x_test, y_test
 
