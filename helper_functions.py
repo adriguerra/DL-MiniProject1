@@ -156,78 +156,77 @@ def generate_pair_sets(nb):
 # TODO merge both
 # TODO document methods
 
-def preprocess_data(train_input, train_classes, test_input, test_classes, reshape, one_hot_encoded, split, normalized):
+def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, split, normalized):
     """
     Preprocesses and formats all the data as appropriate for the architecture.
 
     IMPORTANT: Returns arrays of tensors.
 
-    :param train_input: tensor N × 2 × 14 × 14
-    :param train_classes: tensor N × 2
-    :param test_input: tensor N × 2 × 14 × 14
-    :param test_classes: tensor N × 2
-    :param reshape: reshapes train_input and test_input to tensors of dimension N × 2 × 196
+    :param x_train: tensor N × 2 × 14 × 14
+    :param y_train: tensor N × 2
+    :param x_test: tensor N × 2 × 14 × 14
+    :param y_test: tensor N × 2
+    :param reshape: reshapes x_train and x_test to tensors of dimension N × 2 × 196
     :param one_hot_encoded: converts all tensors to one hot encoded tensors
     :param split: splits all tensors
     :param normalized: normalizes all tensors
-    :returns: train_input, train_classes, test_input, test_classes
+    :returns: x_train, y_train, x_test, y_test
     Each variable is either an array of 2 tensors if split == True
     or an array of 1 tensor if split == False
-    train_input, train_classes, test_input, test_classes
+    x_train, y_train, x_test, y_test
     """
 
     if reshape:
-        train_input, test_input = reshape_data(train_input, test_input)
+        x_train, x_test = reshape_data(x_train, x_test)
 
     if split:
-        train_input, train_classes, test_input, test_classes = split_img_data(train_input, train_classes, test_input, test_classes)
+        x_train, y_train, x_test, y_test = split_img_data(x_train, y_train, x_test, y_test)
 
-    train_input[0] = 0.9*train_input[0]
-    train_input[1] = 0.9*train_input[1]
+    x_train[0] = 0.9*x_train[0]
+    x_train[1] = 0.9*x_train[1]
 
-    test_input[0] = 0.9*test_input[0]
-    test_input[1] = 0.9*test_input[1]
+    x_test[0] = 0.9*x_test[0]
+    x_test[1] = 0.9*x_test[1]
 
     if one_hot_encoded:
-        train_classes[0] = convert_to_one_hot_labels(train_input[0], train_classes[0])
-        train_classes[1] = convert_to_one_hot_labels(train_input[1], train_classes[1])
+        y_train[0] = convert_to_one_hot_labels(x_train[0], y_train[0])
+        y_train[1] = convert_to_one_hot_labels(x_train[1], y_train[1])
 
-        test_classes[0] = convert_to_one_hot_labels(test_input[0], test_classes[0])
-        test_classes[1] = convert_to_one_hot_labels(test_input[1], test_classes[1])
-
+        y_test[0] = convert_to_one_hot_labels(x_test[0], y_test[0])
+        y_test[1] = convert_to_one_hot_labels(x_test[1], y_test[1])
 
     if normalized:
-        train_input[0], test_classes[0] = normalize(train_input[0], test_classes[0])
-        train_input[1], test_classes[1] = normalize(train_input[1], test_classes[1])
+        x_train[0], y_test[0] = normalize(x_train[0], y_test[0])
+        x_train[1], y_test[1] = normalize(x_train[1], y_test[1])
 
-    return train_input, train_classes, test_input, test_classes
+    return x_train, y_train, x_test, y_test
 
 
-def normalize(train_input, test_input):
-    mu, std = train_input.mean(), train_input.std()
-    train_input.sub_(mu).div_(std)
-    test_input.sub_(mu).div_(std)
-    return train_input, test_input
+def normalize(x_train, x_test):
+    mu, std = x_train.mean(), x_train.std()
+    x_train.sub_(mu).div_(std)
+    x_test.sub_(mu).div_(std)
+    return x_train, x_test
 
-def reshape_data(train_input, test_input):
-    train_input = train_input.clone().reshape(train_input.size(0), 2, -1)
-    test_input = test_input.clone().reshape(test_input.size(0), 2, -1)
-    return train_input, test_input
+def reshape_data(x_train, x_test):
+    x_train = x_train.clone().reshape(x_train.size(0), 2, -1)
+    x_test = x_test.clone().reshape(x_test.size(0), 2, -1)
+    return x_train, x_test
 
-def split_img_data(train_input, train_classes, test_input, test_classes):
-    train_input1 = train_input[:, 0]
-    train_input2 = train_input[:, 1]
+def split_img_data(x_train, y_train, x_test, y_test):
+    x_train1 = x_train[:, 0]
+    x_train2 = x_train[:, 1]
 
-    test_input1 = test_input[:, 0]
-    test_input2 = test_input[:, 1]
+    x_test1 = x_test[:, 0]
+    x_test2 = x_test[:, 1]
 
-    train_classes1 = train_classes[:,0]
-    train_classes2 = train_classes[:,1]
+    y_train1 = y_train[:,0]
+    y_train2 = y_train[:,1]
 
-    test_classes1 = test_classes[:,0]
-    test_classes2 = test_classes[:,1]
+    y_test1 = y_test[:,0]
+    y_test2 = y_test[:,1]
 
-    return [train_input1, train_input2], [train_classes1, train_classes2], [test_input1, test_input2], [test_classes1, test_classes2]
+    return [x_train1, x_train2], [y_train1, y_train2], [x_test1, x_test2], [y_test1, y_test2]
 
 def xavier_normal_(tensor, gain):
     fan_in = tensor.size()[0]
@@ -236,15 +235,15 @@ def xavier_normal_(tensor, gain):
     with torch.no_grad():
         return tensor.normal_(0,std), std
 
-def train_model(model, train_input, train_target, one_hot_encoded):
+def train_model(model, x_train, train_target, one_hot_encoded):
     model.train()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1e-1)
     nb_epochs = 250
 
     for e in range(nb_epochs):
-        for b in range(0, train_input.size(0), mini_batch_size):
-            output = model(train_input.narrow(0, b, mini_batch_size))
+        for b in range(0, x_train.size(0), mini_batch_size):
+            output = model(x_train.narrow(0, b, mini_batch_size))
             # max needed if train_target is one-hot encoded
             if(one_hot_encoded):
                 loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
@@ -269,10 +268,10 @@ def compute_nb_errors(model, data_input, data_target, one_hot_encoded):
 
     return nb_data_errors
 
-def compute_errors(m, train_input, train_classes, test_input, test_classes, stds, one_hot_encoded):
+def compute_errors(m, x_train, y_train, x_test, y_test, stds, one_hot_encoded):
     """Computes the train errors and test errors of the given models
-    for the given standard deviations on the train_input, test_input data
-    with the labels in the train_classes and test_classes.
+    for the given standard deviations on the x_train, x_test data
+    with the labels in the y_train and y_test.
     If the standard deviations parameter is None, a Xavier
     initialization is performed."""
 
@@ -288,11 +287,11 @@ def compute_errors(m, train_input, train_classes, test_input, test_classes, stds
             for p in model.parameters():
                 p.data.normal_(0, std)
 
-        train_model(model, train_input, train_classes, one_hot_encoded)
-        train_error = compute_nb_errors(model, train_input, train_classes, one_hot_encoded)
-        test_error = compute_nb_errors(model, test_input, test_classes, one_hot_encoded)
+        train_model(model, x_train, y_train, one_hot_encoded)
+        train_error = compute_nb_errors(model, x_train, y_train, one_hot_encoded)
+        test_error = compute_nb_errors(model, x_test, y_test, one_hot_encoded)
         print('std {:f} {:s} train_error {:.02f}% test_error {:.02f}%'.format(
                 std,
                 m.__name__,
-                train_error / train_input.size(0) * 100,
-                test_error / test_input.size(0) * 100))
+                train_error / x_train.size(0) * 100,
+                test_error / x_test.size(0) * 100))
