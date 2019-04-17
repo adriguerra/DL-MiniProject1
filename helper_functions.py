@@ -189,7 +189,7 @@ def xavier_normal_(tensor, gain):
     with torch.no_grad():
         return tensor.normal_(0,std), std
 
-def train_model(model, train_input, train_target, one_hot_encoded=False):
+def train_model(model, train_input, train_target, one_hot_encoded):
     model.train()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1e-1)
@@ -207,7 +207,7 @@ def train_model(model, train_input, train_target, one_hot_encoded=False):
             loss.backward()
             optimizer.step()
 
-def compute_nb_errors(model, data_input, data_target, one_hot_encoded=False):
+def compute_nb_errors(model, data_input, data_target, one_hot_encoded):
 
     nb_data_errors = 0
 
