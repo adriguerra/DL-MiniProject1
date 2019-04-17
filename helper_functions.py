@@ -156,6 +156,53 @@ def generate_pair_sets(nb):
 # TODO merge both
 # TODO document methods
 
+def preprocess_data(train_input, train_classes, test_input, test_classes, reshape, one_hot_encoded, split, normalized):
+    """
+    Preprocesses and formats all the data as appropriate for the architecture.
+
+    IMPORTANT: Returns arrays of tensors.
+
+    :param train_input: tensor N × 2 × 14 × 14
+    :param train_classes: tensor N × 2
+    :param test_input: tensor N × 2 × 14 × 14
+    :param test_classes: tensor N × 2
+    :param reshape: reshapes train_input and test_input to tensors of dimension N × 2 × 196
+    :param one_hot_encoded: converts all tensors to one hot encoded tensors
+    :param split: splits all tensors
+    :param normalized: normalizes all tensors
+    :returns: train_input, train_classes, test_input, test_classes
+    Each variable is either an array of 2 tensors if split == True
+    or an array of 1 tensor if split == False
+    train_input, train_classes, test_input, test_classes
+    """
+
+    if reshape:
+        train_input, test_input = reshape_data(train_input, test_input)
+
+    if split:
+        train_input, train_classes, test_input, test_classes = split_img_data(train_input, train_classes, test_input, test_classes)
+
+    train_input[0] = 0.9*train_input[0]
+    train_input[1] = 0.9*train_input[1]
+
+    test_input[0] = 0.9*test_input[0]
+    test_input[1] = 0.9*test_input[1]
+
+    if one_hot_encoded:
+        train_classes[0] = convert_to_one_hot_labels(train_input[0], train_classes[0])
+        train_classes[1] = convert_to_one_hot_labels(train_input[1], train_classes[1])
+
+        test_classes[0] = convert_to_one_hot_labels(test_input[0], test_classes[0])
+        test_classes[1] = convert_to_one_hot_labels(test_input[1], test_classes[1])
+
+
+    if normalized:
+        train_input[0], test_classes[0] = normalize(train_input[0], test_classes[0])
+        train_input[1], test_classes[1] = normalize(train_input[1], test_classes[1])
+
+    return train_input, train_classes, test_input, test_classes
+
+
 def normalize(train_input, test_input):
     mu, std = train_input.mean(), train_input.std()
     train_input.sub_(mu).div_(std)
@@ -167,7 +214,7 @@ def reshape_data(train_input, test_input):
     test_input = test_input.clone().reshape(test_input.size(0), 2, -1)
     return train_input, test_input
 
-def split_img_data(train_input, test_input, train_classes, test_classes):
+def split_img_data(train_input, train_classes, test_input, test_classes):
     train_input1 = train_input[:, 0]
     train_input2 = train_input[:, 1]
 
@@ -180,7 +227,7 @@ def split_img_data(train_input, test_input, train_classes, test_classes):
     test_classes1 = test_classes[:,0]
     test_classes2 = test_classes[:,1]
 
-    return [train_input1, train_input2], [test_input1, test_input2], [train_classes1, train_classes2], [test_classes1, test_classes2]
+    return [train_input1, train_input2], [train_classes1, train_classes2], [test_input1, test_input2], [test_classes1, test_classes2]
 
 def xavier_normal_(tensor, gain):
     fan_in = tensor.size()[0]
