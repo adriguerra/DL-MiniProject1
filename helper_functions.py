@@ -181,6 +181,11 @@ def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, 
 
     if split:
         x_train, y_train, x_test, y_test = split_img_data(x_train, y_train, x_test, y_test)
+    else:
+        x_train = x_train.clone().reshape(x_train.size(0), -1)
+        y_train = y_train.clone().reshape(y_train.size(0), -1)
+        x_test = x_test.clone().reshape(x_test.size(0), -1)
+        y_test = y_test.clone().reshape(y_test.size(0), -1)
 
     x_train[0] = 0.9*x_train[0]
     x_train[1] = 0.9*x_train[1]
