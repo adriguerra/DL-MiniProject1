@@ -250,7 +250,7 @@ def train_model(model, x_train, train_target, one_hot_encoded):
         for b in range(0, x_train.size(0), mini_batch_size):
             output = model(x_train.narrow(0, b, mini_batch_size))
             # max needed if train_target is one-hot encoded
-            if(one_hot_encoded):
+            if one_hot_encoded:
                 loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
             else:
                 loss = criterion(output, train_target.narrow(0, b, mini_batch_size))
