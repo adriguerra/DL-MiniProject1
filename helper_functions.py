@@ -253,7 +253,7 @@ def train_model(model, x_train, train_target, one_hot_encoded):
             if one_hot_encoded:
                 loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
             else:
-                loss = criterion(output, train_target.narrow(0, b, mini_batch_size))
+                loss = criterion(output, train_target.narrow(0, b, mini_batch_size).squeeze())
             model.zero_grad()
             loss.backward()
             optimizer.step()
