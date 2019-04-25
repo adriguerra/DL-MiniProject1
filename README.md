@@ -1,5 +1,9 @@
 # DL-MiniProject1
 
+The objective of this project is to test different architectures to compare two digits visible in a
+two-channel image. In particular, it aims at showing the impact of weight sharing, and of the use of an
+auxiliary loss to help the training of the main objective.
+
 ## Guidelines for team collaboration
 
 This file is intended to provide some rules and guidelines on how to work as a group to ensure maximum productivity. Anyone in the group is free to edit this file or make any suggestions.
