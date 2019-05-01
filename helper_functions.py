@@ -47,11 +47,6 @@ if args.seed >= 0:
 ######################################################################
 # The data
 
-def convert_to_one_hot_labels(input, target):
-    tmp = input.new_zeros(target.size(0), target.max() + 1)
-    tmp.scatter_(1, target.view(-1, 1), 1.0)
-    return tmp
-
 def load_data(cifar = None, one_hot_labels = False, normalize = False, flatten = True):
 
     if args.data_dir is not None:
@@ -206,6 +201,10 @@ def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, 
 
     return x_train, y_train, x_test, y_test
 
+def convert_to_one_hot_labels(input, target):
+    tmp = input.new_zeros(target.size(0), target.max() + 1)
+    tmp.scatter_(1, target.view(-1, 1), 1.0)
+    return tmp
 
 def normalize(x_train, x_test):
     mu, std = x_train.mean(), x_train.std()
