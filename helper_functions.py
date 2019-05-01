@@ -137,22 +137,26 @@ def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, 
 
     return x_train, y_train, x_test, y_test
 
+# TODO doc
 def convert_to_one_hot_labels(input, target):
     tmp = input.new_zeros(target.size(0), target.max() + 1)
     tmp.scatter_(1, target.view(-1, 1), 1.0)
     return tmp
 
+# TODO doc
 def normalize(x_train, x_test):
     mu, std = x_train.mean(), x_train.std()
     x_train.sub_(mu).div_(std)
     x_test.sub_(mu).div_(std)
     return x_train, x_test
 
+# TODO doc
 def reshape_data(x_train, x_test):
     x_train = x_train.clone().reshape(x_train.size(0), 2, -1)
     x_test = x_test.clone().reshape(x_test.size(0), 2, -1)
     return x_train, x_test
 
+# TODO doc
 def split_img_data(x_train, y_train, x_test, y_test):
     x_train1 = x_train[:, 0]
     x_train2 = x_train[:, 1]
@@ -168,6 +172,7 @@ def split_img_data(x_train, y_train, x_test, y_test):
 
     return [x_train1, x_train2], [y_train1, y_train2], [x_test1, x_test2], [y_test1, y_test2]
 
+# TODO doc
 def xavier_normal_(tensor, gain):
     fan_in = tensor.size()[0]
     fan_out = tensor.size()[1]
@@ -175,6 +180,7 @@ def xavier_normal_(tensor, gain):
     with torch.no_grad():
         return tensor.normal_(0,std), std
 
+# TODO doc
 def train_model(model, x_train, train_target, one_hot_encoded):
     model.train()
     criterion = nn.CrossEntropyLoss()
@@ -193,6 +199,7 @@ def train_model(model, x_train, train_target, one_hot_encoded):
             loss.backward()
             optimizer.step()
 
+# TODO doc
 def compute_nb_errors(model, data_input, data_target, one_hot_encoded):
 
     nb_data_errors = 0
