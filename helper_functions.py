@@ -47,71 +47,7 @@ if args.seed >= 0:
 ######################################################################
 # The data
 
-def load_data(cifar = None, one_hot_labels = False, normalize = False, flatten = True):
 
-    if args.data_dir is not None:
-        data_dir = args.data_dir
-    else:
-        data_dir = os.environ.get('PYTORCH_DATA_DIR')
-        if data_dir is None:
-            data_dir = './data'
-
-    if args.cifar or (cifar is not None and cifar):
-        print('* Using CIFAR')
-        cifar_train_set = datasets.CIFAR10(data_dir + '/cifar10/', train = True, download = True)
-        cifar_test_set = datasets.CIFAR10(data_dir + '/cifar10/', train = False, download = True)
-
-        train_input = torch.from_numpy(cifar_train_set.train_data)
-        train_input = train_input.transpose(3, 1).transpose(2, 3).float()
-        train_target = torch.tensor(cifar_train_set.train_labels, dtype = torch.int64)
-
-        test_input = torch.from_numpy(cifar_test_set.test_data).float()
-        test_input = test_input.transpose(3, 1).transpose(2, 3).float()
-        test_target = torch.tensor(cifar_test_set.test_labels, dtype = torch.int64)
-
-    else:
-        print('* Using MNIST')
-        mnist_train_set = datasets.MNIST(data_dir + '/mnist/', train = True, download = True)
-        mnist_test_set = datasets.MNIST(data_dir + '/mnist/', train = False, download = True)
-
-        train_input = mnist_train_set.train_data.view(-1, 1, 28, 28).float()
-        train_target = mnist_train_set.train_labels
-        test_input = mnist_test_set.test_data.view(-1, 1, 28, 28).float()
-        test_target = mnist_test_set.test_labels
-
-    if flatten:
-        train_input = train_input.clone().reshape(train_input.size(0), -1)
-        test_input = test_input.clone().reshape(test_input.size(0), -1)
-
-    if args.full:
-        if args.tiny:
-            raise ValueError('Cannot have both --full and --tiny')
-    else:
-        if args.tiny:
-            print('** Reduce the data-set to the tiny setup')
-            train_input = train_input.narrow(0, 0, 500)
-            train_target = train_target.narrow(0, 0, 500)
-            test_input = test_input.narrow(0, 0, 100)
-            test_target = test_target.narrow(0, 0, 100)
-        else:
-            print('** Reduce the data-set (use --full for the full thing)')
-            train_input = train_input.narrow(0, 0, 1000)
-            train_target = train_target.narrow(0, 0, 1000)
-            test_input = test_input.narrow(0, 0, 1000)
-            test_target = test_target.narrow(0, 0, 1000)
-
-    print('** Use {:d} train and {:d} test samples'.format(train_input.size(0), test_input.size(0)))
-
-    if one_hot_labels:
-        train_target = convert_to_one_hot_labels(train_input, train_target)
-        test_target = convert_to_one_hot_labels(test_input, test_target)
-
-    if normalize:
-        mu, std = train_input.mean(), train_input.std()
-        train_input.sub_(mu).div_(std)
-        test_input.sub_(mu).div_(std)
-
-    return train_input, train_target, test_input, test_target
 
 ######################################################################
 
