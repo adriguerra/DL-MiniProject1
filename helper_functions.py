@@ -10,7 +10,6 @@ from torch import nn
 
 mini_batch_size = 100
 
-# Methods from dlc_practical_prologue
 ######################################################################
 
 parser = argparse.ArgumentParser(description='DLC prologue file for practical sessions.')
@@ -45,11 +44,6 @@ if args.seed >= 0:
     torch.manual_seed(args.seed)
 
 ######################################################################
-# The data
-
-
-
-######################################################################
 
 def mnist_to_pairs(nb, input, target):
     input = torch.functional.F.avg_pool2d(input, kernel_size = 2)
@@ -82,10 +76,6 @@ def generate_pair_sets(nb):
            mnist_to_pairs(nb, test_input, test_target)
 
 ######################################################################
-
-# Our methods
-# TODO merge both
-# TODO document methods
 
 def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, split, normalized):
     """
