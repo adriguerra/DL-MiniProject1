@@ -232,3 +232,26 @@ def compute_errors(m, x_train, y_train, x_test, y_test, stds, one_hot_encoded):
                 m.__name__,
                 train_error / x_train.size(0) * 100,
                 test_error / x_test.size(0) * 100))
+
+        
+def compare_and_predict(output1, output2):
+    """Compares the entries of the two outputs and returns 0 if entry of output1 is larger 
+    than output21 and 1 if entry of output2 is larger."""
+    predict = []
+    
+    for (a,b) in zip(output1, output2):
+        if a <= b:
+            predict.append(1)
+        else:
+            predict.append(0)
+    return predict
+       
+    
+def compute_error_(predicted, test):
+    """Computes percentage of number of errors."""
+    error = 0
+    
+    for (a,b) in zip(predicted, test):
+        if a != b:
+            error+=1
+    return 100*(error/len(predicted))
