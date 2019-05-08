@@ -81,9 +81,6 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
             output_y = classifier2(encoded_img2)
             input = torch.cat([encoded_img1, encoded_img2], 1)
             output_binary_target = classifier3(input)
-
-
-
             loss_x = criterion(output_x, train_target1.narrow(0, b, mini_batch_size).long())
             loss_y = criterion(output_y, train_target2.narrow(0, b, mini_batch_size).long())
             loss_binary_target = criterion(output_binary_target, train_target3.narrow(0, b, mini_batch_size).long())
@@ -102,31 +99,29 @@ def compute_nb_errors(prediction, target):
     return errors / len(prediction) * 100
 
 
-print("Begin the training")
-model = Net2()
-classifier1 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
-classifier2 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
-classifier3 = nn.Sequential(nn.Dropout(p=0.5), nn.Linear(100 * 2, 2), nn.Sigmoid())
-
-for k in range(15):
-    train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
-                mini_batch_size, classifier1, classifier2, classifier3)
-    model.eval()
-    encoder1 = model(test_input[0])
-    encoder2 = model(test_input[1])
-    output1 = classifier1(encoder1)
-    output2 = classifier2(encoder2)
-    prediction = classifier3(torch.cat([encoder1, encoder2], 1))
-    print("Accuracy based on classes prediction : ")
-    print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
-
-    print("Accuracy based on target prediction")
-    print(compute_error_(prediction.max(1)[1], test_target))
-    if k == 14:
-        print("lol")
-        print("Accuracy based on classes prediction : ")
-        print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
-        print("Accuracy based on target prediction")
-        print(compute_error_(prediction.max(1)[1], test_target))
+def train_without_ws(digit_scalar):
+    print("----Training the model----")
+    model = Net2()
+    classifier1 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
+    classifier2 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
+    classifier3 = nn.Sequential(nn.Dropout(p=0.5), nn.Linear(100 * 2, 2), nn.Sigmoid())
+    if digit_scalar == 0:
+        print("----Begin the training without auxiliary loss----")
+    else:
+        print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
+    for k in range(15):
+        train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
+                    mini_batch_size, classifier1, classifier2, classifier3)
+        model.eval()
+        encoder1 = model(test_input[0])
+        encoder2 = model(test_input[1])
+        output1 = classifier1(encoder1)
+        output2 = classifier2(encoder2)
+        prediction = classifier3(torch.cat([encoder1, encoder2], 1))
+        if k == 14:
+            print("Accuracy based on classes prediction : ")
+            print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
+            print("Accuracy based on target prediction")
+            print(compute_error_(prediction.max(1)[1], test_target))
 
 

@@ -57,10 +57,8 @@ class Net2(nn.Module):
         binary_target = self.fc4(binary_target)
         return x, y, binary_target
 
-print("Convolution Neural Network with Auxiliary loss and Weight sharing")
 print("Preprocessing and setting up the data for training")
 N = 1000
-
 train_input, train_target, train_classes, test_input, test_target, test_classes = generate_pair_sets(N)
 train_input, test_input, train_classes, test_classes = preprocess_data(train_input,
                                                                        test_input,
@@ -97,9 +95,11 @@ def compute_nb_errors(prediction, target):
             errors += 1
     return errors / len(prediction) * 100
 
-def train(digit_scalar):
+
+def train_with_ws(digit_scalar):
+    print("----Training the model----")
     if digit_scalar == 0:
-        print("Begin the training without auxiliary loss")
+        print("----Begin the training without auxiliary loss----")
     else:
         print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
     model = Net2()
