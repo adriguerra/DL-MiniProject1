@@ -217,7 +217,7 @@ def compute_errors(m, x_train, y_train, x_test, y_test, stds, one_hot_encoded):
         for p in model.parameters():
             if len(p.size()) == 2:
                 updated_tensor, std = xavier_normal_(p.data.normal_(0, 1), gain=1)
-        print("Computed standard deviation according to 'Xavier initialization': {:.3f}".format(std))
+        print("Computed standard deviation according to 'Xavier initialization': {:.3f}\n".format(std))
         stds = [std]
     for std in stds:
         if std > 0:
