@@ -47,15 +47,8 @@ def classify_binary_target(x, y, nb_hidden=100):
     return classifier.apply(input)
 
 
-
-
-
-
-
-
-print("Convolution Neural Network with Auxiliary loss and Weight sharing")
-print("Preprocessing and setting up the data for training")
 N = 1000
+
 
 train_input, train_target, train_classes, test_input, test_target, test_classes = generate_pair_sets(N)
 train_input, test_input, train_classes, test_classes = preprocess_data(train_input,
@@ -64,18 +57,19 @@ train_input, test_input, train_classes, test_classes = preprocess_data(train_inp
                                                                        test_classes)
 
 
-def train_model(model, train_input1, train_input2, train_target1, train_target2, train_target3,
+def train_model(model1, model2, train_input1, train_input2, train_target1, train_target2, train_target3,
                 mini_batch_size, classifier1, classifier2, classifier3, digit_scalar=1,
                 binary_target_scalar=1):
     criterion = nn.CrossEntropyLoss()
     eta = 1e-1
-    optimizer = torch.optim.SGD(model.parameters(), lr=eta, momentum=0)  # check the lectures
+    optimizer1 = torch.optim.SGD(model1.parameters(), lr=eta, momentum=0)
+    optimizer2 = torch.optim.SGD(model2.parameters(), lr=eta, momentum=0) # check the lectures
 
     for e in range(25):
         sum_loss = 0
         for b in range(0, train_input1.size(0), mini_batch_size):
-            encoded_img1 = model(train_input1.narrow(0, b, mini_batch_size))
-            encoded_img2 = model(train_input2.narrow(0, b, mini_batch_size))
+            encoded_img1 = model1(train_input1.narrow(0, b, mini_batch_size))
+            encoded_img2 = model2(train_input2.narrow(0, b, mini_batch_size))
 
             output_x = classifier1(encoded_img1)
             output_y = classifier2(encoded_img2)
@@ -85,10 +79,12 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
             loss_y = criterion(output_y, train_target2.narrow(0, b, mini_batch_size).long())
             loss_binary_target = criterion(output_binary_target, train_target3.narrow(0, b, mini_batch_size).long())
             loss = digit_scalar * (loss_x + loss_y) + binary_target_scalar * loss_binary_target
-            model.zero_grad()
+            model1.zero_grad()
+            model2.zero_grad()
             loss.backward()
             sum_loss = sum_loss + loss.item()
-            optimizer.step()
+            optimizer1.step()
+            optimizer2.step()
 
 
 def compute_nb_errors(prediction, target):
@@ -100,8 +96,10 @@ def compute_nb_errors(prediction, target):
 
 
 def train_without_ws(digit_scalar):
+    print("Preprocessing and setting up the data for training")
     print("----Training the model----")
-    model = Net2()
+    model1 = Net2()
+    model2 = Net2()
     classifier1 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
     classifier2 = nn.Sequential(nn.Linear(100, 10), nn.Sigmoid())
     classifier3 = nn.Sequential(nn.Dropout(p=0.5), nn.Linear(100 * 2, 2), nn.Sigmoid())
@@ -110,11 +108,12 @@ def train_without_ws(digit_scalar):
     else:
         print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
     for k in range(15):
-        train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
+        train_model(model1, model2, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
                     mini_batch_size, classifier1, classifier2, classifier3)
-        model.eval()
-        encoder1 = model(test_input[0])
-        encoder2 = model(test_input[1])
+        model1.eval()
+        model2.eval()
+        encoder1 = model1(test_input[0])
+        encoder2 = model2(test_input[1])
         output1 = classifier1(encoder1)
         output2 = classifier2(encoder2)
         prediction = classifier3(torch.cat([encoder1, encoder2], 1))

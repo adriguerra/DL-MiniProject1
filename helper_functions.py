@@ -280,6 +280,14 @@ def preprocess_data(train_input, test_input, train_classes, test_classes):
 
     return x, y, z, t
 
+def compute_nb_errors(prediction, target):
+    errors = 0
+    for (a, b) in zip(prediction, target):
+        if a.float() != b.float():
+            errors += 1
+    return errors / len(prediction) * 100
+
+
 
 
 

@@ -57,7 +57,6 @@ class Net2(nn.Module):
         binary_target = self.fc4(binary_target)
         return x, y, binary_target
 
-print("Preprocessing and setting up the data for training")
 N = 1000
 train_input, train_target, train_classes, test_input, test_target, test_classes = generate_pair_sets(N)
 train_input, test_input, train_classes, test_classes = preprocess_data(train_input,
@@ -88,15 +87,8 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
             optimizer.step()
 
 
-def compute_nb_errors(prediction, target):
-    errors = 0
-    for (a, b) in zip(prediction, target):
-        if a.float() != b.float():
-            errors += 1
-    return errors / len(prediction) * 100
-
-
 def train_with_ws(digit_scalar):
+    print("Preprocessing and setting up the data for training")
     print("----Training the model----")
     if digit_scalar == 0:
         print("----Begin the training without auxiliary loss----")
