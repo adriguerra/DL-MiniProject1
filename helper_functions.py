@@ -255,3 +255,40 @@ def compute_error_(predicted, test):
         if a != b:
             error+=1
     return 100*(error/len(predicted))
+
+
+def prevent_vanishing_gradient(train_input, test_input, train_classes, test_classes):
+
+    train_input = [train_input[0]*0.9, train_input[1]*0.9]
+    test_input = [test_input[0] * 0.9, test_input[1] * 0.9]
+    train_classes = [train_classes[0] * 0.9, train_classes[1] * 0.9]
+    test_classes = [test_classes[0] * 0.9, test_classes[1] * 0.9]
+
+    return train_input, test_input, train_classes, test_classes
+
+
+def preprocess_data(train_input, test_input, train_classes, test_classes):
+
+    x, y, z, t = split_img_data(train_input, test_input, train_classes, test_classes)
+    prevent_vanishing_gradient(x, y, z, t)
+    x[0], y[0] = normalize(x[0], y[0])
+    x[1], y[1] = normalize(x[1], y[1])
+    x[0] = torch.unsqueeze(x[0], 1)
+    x[1] = torch.unsqueeze(x[1], 1)
+    y[0] = torch.unsqueeze(y[0], 1)
+    y[1] = torch.unsqueeze(y[1], 1)
+
+    return x, y, z, t
+
+def compute_nb_errors(prediction, target):
+    errors = 0
+    for (a, b) in zip(prediction, target):
+        if a.float() != b.float():
+            errors += 1
+    return errors / len(prediction) * 100
+
+
+
+
+
+
