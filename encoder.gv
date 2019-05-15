@@ -1,0 +1,269 @@
+// ================================================= //
+// Author: Miquel Perello Nieto                      //
+// Web:    www.perellonieto.com                      //
+// Email:  miquel.perellonieto at aalto dot fi       //
+// ================================================= //
+//
+// This is an example to create Alexnet Convolutional Neural Network
+// using the opensource tool Graphviz.
+//
+// Tested with version:
+//
+//      2.36.0 (20140111.2315)
+//
+// To generate the graph as a PDF just run:
+//
+//      dot -Tpdf alexnet.gv -o alexnet.pdf
+//
+// One think to have in mind is that the order of the nodes definition modifies
+// nodes position.
+
+digraph Alexnet {
+    // ================================== //
+    //  GRAPH OPTIONS                     //
+    // ================================== //
+
+    // From Top to Bottom
+    rankdir=TB;
+
+    // Tittle possition: top
+    labelloc="t";
+    // Tittle
+    label="LeNet-Encoder";
+
+    // ================================== //
+    //  NODE SHAPES                       //
+    // ================================== //
+    //
+    // There is a shape and color description for each node
+    // of the graph.
+    //
+    // It can be specified individually per node:
+    //      first_node [shape=circle, color=blue];
+    //
+    // Or for a group of nodes if specified previously:
+    //      node [shape=circle, color=blue];
+    //      first_node;
+    //      second_node;
+    //
+
+    // Data node
+    // =========
+
+    data [shape=box3d, color=black];
+
+    // Label node
+    // =========
+
+    //label [shape=tab, color=black];
+
+    // Loss function node
+    // ==================
+
+    //loss [shape=component, color=black];
+
+    // Convolution nodes
+    // =================
+    //
+    // All convolutions are a blue inverted trapezoid
+    //
+
+    node [shape=invtrapezium, fillcolor=lightblue, style=filled];
+    conv1;
+    conv2;
+    // Splitted layer 2
+    // ================
+    //
+    //  Layers with separated convolutions need to be in subgraphs
+    //  This is because we want arrows from individual nodes but
+    //  we want to consider all of them as a unique layer.
+    //
+
+
+
+    // Splitted layer 4
+    // ================
+    //
+
+
+
+    // Splitted layer 5
+    // ================
+    //
+
+
+
+    // Rectified Linear Unit nodes
+    // ============================
+    //
+    // RELU nodes are green squares
+    //
+
+    node [shape=Msquare, fillcolor=darkolivegreen2, style=filled];
+    relu1;
+    relu2;
+
+
+    // Pooling nodes
+    // =============
+    //
+    // All pooling nodes are orange inverted triangles
+    //
+
+    node [shape=invtriangle, fillcolor=orange, style=filled];
+    pool1;
+    pool2;
+
+    // Normalization nodes
+    // ===================
+    //
+    // All normalization nodes are gray circles inside a bigger circle
+    // (it reminds me a 3 dimmensional Gaussian looked from top)
+    //
+
+    node [shape=doublecircle, fillcolor=grey, style=filled];
+    norm1;
+    norm2;
+
+    // Fully connected layers
+    // ======================
+    //
+    // All fully connected layers are salmon circles
+    //
+
+
+
+    // Drop Out nodes
+    // ==============
+    //
+    // All DropOut nodes are purple octagons
+    //
+
+    node [shape=tripleoctagon, fillcolor=plum2, style=filled];
+    //drop6;
+    //drop7;
+
+    // ================================== //
+    //  ARROWS                            //
+    // ================================== //
+    //
+    // There is a color and possible a label for each
+    // arrow in the graph.
+    // Also, some nodes has connections going in and
+    // going out.
+    //
+    // The color can be specified individually per arrow:
+    // first_node -> second_node [color=blue, style=bold,label="one to two"];
+    //
+    // Or for a group of nodes if specified previously:
+    //  edge [color=blue];
+    //  first_node -> second_node;
+    //  second_node -> first_node;
+    //  second_node -> third_node;
+    //
+
+    //
+    // LAYER 1
+    //
+
+    data  -> conv1 [color=lightblue, style=bold,label="out = 32, kernel = 3"];
+
+    edge [color=darkolivegreen2];
+    conv1 -> norm1;
+    norm1 -> pool1;
+    pool1 -> relu1;
+    relu1 -> conv2 [color=lightblue, style=bold,label="out = 32, kernel = 2"];
+    conv2 -> norm2;
+    norm2 -> pool2;
+    pool2 -> relu2; 
+    relu2 -> conv3 [color=lightblue, style=bold,label="out = 64, kernel = 2"];
+
+    
+    
+
+    //pool1 -> conv2_1 [color=lightblue, style=bold,label="out = 256, kernel = 5, pad = 2"];
+    //pool1 -> conv2_2 [color=lightblue, style=bold];
+
+    //
+    // LAYER 2
+    //
+
+    //edge [color=darkolivegreen2];
+    //conv2_1 -> relu2_1;
+    //conv2_2 -> relu2_2;
+    //relu2_1 -> conv2_1;
+    //relu2_2 -> conv2_2;
+//
+//    //conv2_1 -> norm2 [color=grey, style=bold,label="local_size = 5, alpha = 0.0001, beta = 0.75"];
+//    //conv2_2 -> norm2 [color=grey, style=bold];
+//    //norm2 -> pool2 [color=orange, style=bold,label="pool = MAX, kernel = 3, stride = 2"];
+//
+//    //pool2 -> conv3 [color=lightblue, style=bold,label="out = 384, kernel = 3, pad = 1"];
+//
+//    ////
+//    //// LAYER 3
+//    ////
+//
+//    //conv3 -> relu3 [color=darkolivegreen2];
+//    //relu3 -> conv3 [color=darkolivegreen2];
+//
+//    //conv3 -> conv4_1 [color=lightblue, style=bold,label="out = 384, kernel = 3, pad = 1"];
+//    //conv3 -> conv4_2 [color=lightblue, style=bold];
+//
+//    ////
+//    //// LAYER 4
+//    ////
+//
+//    //edge [color=darkolivegreen2];
+//    //conv4_1 -> relu4_1;
+//    //relu4_1 -> conv4_1;
+//    //conv4_2 -> relu4_2;
+//    //relu4_2 -> conv4_2;
+//
+//    //conv4_1 -> conv5_1 [color=lightblue, style=bold, label="out = 256, kernel = 3, pad = 1"];
+//    //conv4_2 -> conv5_2 [color=lightblue, style=bold];
+//
+//    ////
+//    //// LAYER 5
+//    ////
+//
+//    //edge [color=darkolivegreen2];
+//    //conv5_1 -> relu5_1;
+//    //relu5_1 -> conv5_1;
+//    //conv5_2 -> relu5_2;
+//    //relu5_2 -> conv5_2;
+//
+//    //conv5_1 -> pool5 [color=orange, style=bold,label="pool = MAX, kernel = 3, stride = 2"];
+//    //conv5_2 -> pool5 [color=orange, style=bold];
+//
+//    //pool5 -> fc6 [color=salmon, style=bold,label="out = 4096"];
+//    //fc6 -> relu6 [color=darkolivegreen2];
+//    //relu6 -> fc6 [color=darkolivegreen2];
+//    //fc6 -> drop6 [color=plum2, style=bold,label="dropout_ratio = 0.5"];
+//    //drop6 -> fc6 [color=plum2];
+//
+//    ////
+//    //// LAYER 6
+//    ////
+//
+//    //fc6 -> fc7 [color=salmon, style=bold,label="out = 4096"];
+//
+//    ////
+//    //// LAYER 7
+//    ////
+//
+//    //fc7 -> relu7 [color=darkolivegreen2];
+//    //relu7 -> fc7 [color=darkolivegreen2];
+//    //fc7 -> drop7 [color=plum2, style=bold,label="dropout_ratio = 0.5"];
+//    //drop7 -> fc7 [color=plum2];
+//
+//    //fc7 -> fc8 [color=salmon, style=bold,label="out = 1000"];
+//
+//    ////
+//    //// LAYER 8
+    ////
+
+    //edge [color=black]
+    //fc8 -> loss;
+    //label -> loss;
+}

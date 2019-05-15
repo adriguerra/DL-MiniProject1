@@ -1,12 +1,8 @@
 import torch
-import math
 import argparse
 import os
 
 from torchvision import datasets
-from torch import optim
-from torch import Tensor
-from torch import nn
 
 mini_batch_size = 100
 
@@ -127,27 +123,53 @@ def preprocess_data(x_train, y_train, x_test, y_test, reshape, one_hot_encoded, 
 
     return x_train, y_train, x_test, y_test
 
-# TODO doc
+
 def convert_to_one_hot_labels(input, target):
+    """
+
+    :param input: the input of our data
+    :param target: the target to be one hot encoded
+    :return:
+    """
     tmp = input.new_zeros(target.size(0), target.max() + 1)
     tmp.scatter_(1, target.view(-1, 1), 1.0)
     return tmp
 
-# TODO doc
+
 def normalize(x_train, x_test):
+    """
+
+    :param x_train: The train input we want to normalize
+    :param x_test: the test input we want to normalize
+    :return: train input and test input normalized
+    """
     mu, std = x_train.mean(), x_train.std()
     x_train.sub_(mu).div_(std)
     x_test.sub_(mu).div_(std)
     return x_train, x_test
 
-# TODO doc
+
 def reshape_data(x_train, x_test):
+    """
+
+    :param x_train: input train we want to reshape
+    :param x_test: test train we want to reshape
+    :return:
+    """
     x_train = x_train.clone().reshape(x_train.size(0), 2, -1)
     x_test = x_test.clone().reshape(x_test.size(0), 2, -1)
     return x_train, x_test
 
-# TODO doc
+
 def split_img_data(x_train, y_train, x_test, y_test):
+    """
+
+    :param x_train: the input train we want to split into two images
+    :param y_train: the target train we want to split into two images
+    :param x_test: the input test we want to split
+    :param y_test: the target test we want to split
+    :return: splitted data
+    """
     x_train1 = x_train[:, 0]
     x_train2 = x_train[:, 1]
 
@@ -162,48 +184,6 @@ def split_img_data(x_train, y_train, x_test, y_test):
 
     return [x_train1, x_train2], [y_train1, y_train2], [x_test1, x_test2], [y_test1, y_test2]
 
-# TODO doc
-def xavier_normal_(tensor, gain):
-    fan_in = tensor.size()[0]
-    fan_out = tensor.size()[1]
-    std = gain * math.sqrt(2.0/(fan_in + fan_out))
-    with torch.no_grad():
-        return tensor.normal_(0,std), std
-
-# TODO doc
-def train_model(model, x_train, train_target, one_hot_encoded):
-    model.train()
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=1e-1)
-    nb_epochs = 250
-
-    for e in range(nb_epochs):
-        for b in range(0, x_train.size(0), mini_batch_size):
-            output = model(x_train.narrow(0, b, mini_batch_size))
-            # max needed if train_target is one-hot encoded
-            if one_hot_encoded:
-                loss = criterion(output, train_target.narrow(0, b, mini_batch_size).max(1)[1])
-            else:
-                loss = criterion(output, train_target.narrow(0, b, mini_batch_size).squeeze())
-            model.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-# TODO doc
-def compute_nb_errors(model, data_input, data_target, one_hot_encoded):
-
-    nb_data_errors = 0
-
-    for b in range(0, data_input.size(0), mini_batch_size):
-        output = model(data_input.narrow(0, b, mini_batch_size))
-        _, predicted_classes = torch.max(output.data, 1)
-        for k in range(mini_batch_size):
-            # max needed if one-hot encoded
-            target = data_target.data[b + k].max(0)[1] if one_hot_encoded else data_target.data[b + k]
-            if target != predicted_classes[k]:
-                nb_data_errors = nb_data_errors + 1
-
-    return nb_data_errors
 
 def compute_errors(m, x_train, y_train, x_test, y_test, stds, one_hot_encoded):
     """Computes the train errors and test errors of the given models
@@ -258,6 +238,14 @@ def compute_error_(predicted, test):
 
 
 def prevent_vanishing_gradient(train_input, test_input, train_classes, test_classes):
+    """
+
+    :param train_input: training input as list of two tensor images
+    :param test_input: testing input as list of two tensor images
+    :param train_classes: training digit target as list of two tensors
+    :param test_classes: testing digit target as list of two tensors
+    :return: multiplying data by 0.9 to prevent vanishing gradient
+    """
 
     train_input = [train_input[0]*0.9, train_input[1]*0.9]
     test_input = [test_input[0] * 0.9, test_input[1] * 0.9]
@@ -268,6 +256,14 @@ def prevent_vanishing_gradient(train_input, test_input, train_classes, test_clas
 
 
 def preprocess_data(train_input, test_input, train_classes, test_classes):
+    """
+
+    :param train_input: training input as list of two tensor images
+    :param test_input: testing input as list of two tensor images
+    :param train_classes: training digit target as list of two tensors
+    :param test_classes: testing digit target as list of two tensors
+    :return: preprocessed data
+    """
 
     x, y, z, t = split_img_data(train_input, test_input, train_classes, test_classes)
     prevent_vanishing_gradient(x, y, z, t)
@@ -280,7 +276,14 @@ def preprocess_data(train_input, test_input, train_classes, test_classes):
 
     return x, y, z, t
 
+
 def compute_nb_errors(prediction, target):
+    """
+
+    :param prediction: the prediction of our model
+    :param target: the real target
+    :return:
+    """
     errors = 0
     for (a, b) in zip(prediction, target):
         if a.float() != b.float():

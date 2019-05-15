@@ -3,7 +3,7 @@ from helper_functions import *
 from torch import nn
 from torch.nn import functional as F
 
-
+# the model of our network using weight sharing
 class Net2(nn.Module):
     def __init__(self):
         super(Net2, self).__init__()
@@ -67,6 +67,22 @@ train_input, test_input, train_classes, test_classes = preprocess_data(train_inp
 
 def train_model(model, train_input1, train_input2, train_target1, train_target2, train_target3,
                 mini_batch_size, digit_scalar=1, binary_target_scalar=1):
+    """
+
+    :param model: the model that trains our both images with weight sharing
+    :param train_input1: the training input of our first image
+    :param train_input2: the training input of our second image
+    :param train_target1: the training target of our first image
+    :param train_target2: the training target of our second image
+    :param train_target3: the training target of the oredering
+    :param mini_batch_size: the batch size on which the sgd is trained
+    :param classifier1: the classifier of the first digit
+    :param classifier2: the classifier of the second digit
+    :param classifier3: the classifier of the main ordering
+    :param digit_scalar: the weight used to calibrate the loss of the digit prediction
+    :param binary_target_scalar: the weight used to calibrate the loss of the ordering prediction
+    :return: void, the model is trained while calling this method
+    """
     criterion = nn.CrossEntropyLoss()
     eta = 1e-1
     optimizer = torch.optim.SGD(model.parameters(), lr=eta, momentum=0)  # check the lectures
@@ -88,6 +104,11 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
 
 
 def train_with_ws(digit_scalar):
+    """
+
+    :param digit_scalar: the digit scalar calibrating the auxiliary loss, 0 if we don't want to use auxiliary loss
+    :return: void
+    """
     print("Preprocessing and setting up the data for training")
     print("----Training the model----")
     if digit_scalar == 0:
@@ -105,6 +126,7 @@ def train_with_ws(digit_scalar):
             print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
             print("Accuracy based on target prediction")
             print(compute_error_(prediction.max(1)[1], test_target))
+            return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)
 
 
 
