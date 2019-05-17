@@ -111,22 +111,20 @@ def train_without_ws(digit_scalar):
         print("----Begin the training without auxiliary loss----")
     else:
         print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
-    for k in range(15):
-        train_model(model1, model2, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
+    train_model(model1, model2, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
                     mini_batch_size, classifier1, classifier2, classifier3, digit_scalar)
-        model1.eval()
-        model2.eval()
-        classifier3.eval()
-        encoder1 = model1(test_input[0])
-        encoder2 = model2(test_input[1])
-        output1 = classifier1(encoder1)
-        output2 = classifier2(encoder2)
-        prediction = classifier3(torch.cat([encoder1, encoder2], 1))
-        if k == 14:
-            print("Accuracy based on classes prediction : ")
-            print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
-            print("Accuracy based on target prediction")
-            print(compute_error_(prediction.max(1)[1], test_target))
-            return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)
+    model1.eval()
+    model2.eval()
+    classifier3.eval()
+    encoder1 = model1(test_input[0])
+    encoder2 = model2(test_input[1])
+    output1 = classifier1(encoder1)
+    output2 = classifier2(encoder2)
+    prediction = classifier3(torch.cat([encoder1, encoder2], 1))
 
+    print("Accuracy based on classes prediction : ")
+    print(100-compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
+    print("Accuracy based on target prediction")
+    print(100-compute_error_(prediction.max(1)[1], test_target))
 
+    return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)

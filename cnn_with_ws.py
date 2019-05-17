@@ -111,22 +111,21 @@ def train_with_ws(digit_scalar):
     """
     print("Preprocessing and setting up the data for training")
     print("----Training the model----")
+
     if digit_scalar == 0:
         print("----Begin the training without auxiliary loss----")
     else:
         print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
+
     model = Net2()
-    for k in range(15):
-        train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
-                    mini_batch_size, digit_scalar)
-        model.eval()
-        output1, output2, prediction = model(test_input[0], test_input[1])
-        if k == 14:
-            print("Accuracy based on classes prediction : ")
-            print(compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
-            print("Accuracy based on target prediction")
-            print(compute_error_(prediction.max(1)[1], test_target))
-            return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)
+    train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
+                mini_batch_size, digit_scalar)
+    model.eval()
+    output1, output2, prediction = model(test_input[0], test_input[1])
 
+    print("Accuracy based on classes prediction : ")
+    print(100-compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
+    print("Accuracy based on target prediction")
+    print(100-compute_error_(prediction.max(1)[1], test_target))
 
-
+    return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)
