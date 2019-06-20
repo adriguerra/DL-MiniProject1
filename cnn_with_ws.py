@@ -1,12 +1,21 @@
-# Important imports
 from helper_functions import *
 from torch import nn
 from torch.nn import functional as F
 
-# the model of our network using weight sharing
-class Net2(nn.Module):
+# Number of training samples
+N = 1000
+# Create training and testing datasets
+train_input, train_target, train_classes, test_input, test_target, test_classes = generate_pair_sets(N)
+train_input, test_input, train_classes, test_classes = preprocess_data(train_input,
+                                                                       test_input,
+                                                                       train_classes,
+                                                                       test_classes)
+
+class CNNWS(nn.Module):
+    """Convolutional Neural Network using weight sharing"""
+
     def __init__(self):
-        super(Net2, self).__init__()
+        super().__init__()
         nb_hidden = 100
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
         self.conv1_bn = nn.BatchNorm2d(32)
@@ -48,8 +57,6 @@ class Net2(nn.Module):
 
         x = self.fc2(x)
         y = self.fc2(y)
-
-        #
         x = self.fc4(x)
         y = self.fc4(y)
         binary_target = self.drop3(binary_target)
@@ -57,17 +64,10 @@ class Net2(nn.Module):
         binary_target = self.fc4(binary_target)
         return x, y, binary_target
 
-N = 1000
-train_input, train_target, train_classes, test_input, test_target, test_classes = generate_pair_sets(N)
-train_input, test_input, train_classes, test_classes = preprocess_data(train_input,
-                                                                       test_input,
-                                                                       train_classes,
-                                                                       test_classes)
-
-
 def train_model(model, train_input1, train_input2, train_target1, train_target2, train_target3,
                 mini_batch_size, digit_scalar=1, binary_target_scalar=1):
     """
+    Method to train the models of two images.
 
     :param model: the model that trains our both images with weight sharing
     :param train_input1: the training input of our first image
@@ -81,7 +81,6 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
     :param classifier3: the classifier of the main ordering
     :param digit_scalar: the weight used to calibrate the loss of the digit prediction
     :param binary_target_scalar: the weight used to calibrate the loss of the ordering prediction
-    :return: void, the model is trained while calling this method
     """
     criterion = nn.CrossEntropyLoss()
     eta = 1e-1
@@ -105,27 +104,22 @@ def train_model(model, train_input1, train_input2, train_target1, train_target2,
 
 def train_with_ws(digit_scalar):
     """
+    Train with weight-sharing.
 
     :param digit_scalar: the digit scalar calibrating the auxiliary loss, 0 if we don't want to use auxiliary loss
-    :return: void
     """
-    print("Preprocessing and setting up the data for training")
-    print("----Training the model----")
+    print("----Train model----")
+    print("Auxiliary loss = " + str(digit_scalar))
 
-    if digit_scalar == 0:
-        print("----Begin the training without auxiliary loss----")
-    else:
-        print("Begin the training with auxiliary loss weighted as digit scalar = "+str(digit_scalar))
-
-    model = Net2()
+    model = CNNWS()
     train_model(model, train_input[0], train_input[1], train_classes[0], train_classes[1], train_target,
                 mini_batch_size, digit_scalar)
     model.eval()
     output1, output2, prediction = model(test_input[0], test_input[1])
 
-    print("Accuracy based on classes prediction : ")
+    print("Accuracy based on classes prediction:")
     print(100-compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target))
-    print("Accuracy based on target prediction")
+    print("Accuracy based on target prediction:")
     print(100-compute_error_(prediction.max(1)[1], test_target))
 
     return compute_error_(compare_and_predict(output1.max(1)[1], output2.max(1)[1]), test_target), compute_error_(prediction.max(1)[1], test_target)
